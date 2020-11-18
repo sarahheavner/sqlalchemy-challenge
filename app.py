@@ -30,11 +30,32 @@ def home():
     #list all routes
     return(
         f'Available Routes:<br/>'
+        f'/api/v1.0/precipitation<br/>'
         f'/api/v1.0/stations<br/>'
         f'/api/v1.0/tobs<br/>'
         f'/api/v1.0/start<br/>'
         f'/api/v1.0/start_end<br/>'
     )
+
+
+@app.route('/api/v1.0/precipitation')  
+def precipitation():
+    session = Session(engine)
+
+    precip = session.query(Measurement.date, Measurement.prcp).all()
+
+    session.close()
+
+    all_precip = []
+    for date, prcp in precip:
+        precip_dict={}
+        precip_dict['date'] = date
+        precip_dict['prcp'] = prcp
+        all_precip.append(precip_dict)
+
+    return jsonify(all_precip)
+
+
 
 @app.route('/api/v1.0/stations')
 def stations():
@@ -52,6 +73,10 @@ def stations():
         all_stations.append(station_dict)
 
     return jsonify(all_stations)
+
+
+
+
 
 
 if __name__ == '__main__':
