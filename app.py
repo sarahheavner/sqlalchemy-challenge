@@ -20,3 +20,22 @@ Base.prepare(engine, reflect=True)
 # Save reference to the table
 Measurement = Base.classes.measurement
 Station = Base.classes.station
+
+#Flask setup
+app = Flask(__name__)
+
+#Set Flask Routes
+@app.route('/')
+def home():
+    #list all routes
+    return(
+        f'Available Routes:<br/>'
+        f'/api/v1.0/stations<br/>'
+        f'/api/v1.0/tobs<br/>'
+        f'/api/v1.0/start<br/>'
+        f'/api/v1.0/start_end<br/>'
+    )
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
