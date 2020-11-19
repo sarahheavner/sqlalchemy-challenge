@@ -8,6 +8,8 @@ from sqlalchemy import create_engine, func
 
 from flask import Flask, jsonify
 
+import datetime as dt
+
 
 #Database setup
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
@@ -27,19 +29,20 @@ app = Flask(__name__)
 #Set Flask Routes
 @app.route('/')
 def home():
-    #list all routes
+    """list all available API routes"""
     return(
-        f'Available Routes:<br/>'
-        f'/api/v1.0/precipitation<br/>'
-        f'/api/v1.0/stations<br/>'
-        f'/api/v1.0/tobs<br/>'
-        f'/api/v1.0/start<br/>'
-        f'/api/v1.0/start_end<br/>'
+        f"Available Routes:<br/>"
+        f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/start<br/>"
+        f"/api/v1.0/start/end<br/>"
     )
 
 
 @app.route('/api/v1.0/precipitation')  
 def precipitation():
+    """Convert the query results to a dictionary using date as the key and prcp as the value"""
     session = Session(engine)
 
     precip = session.query(Measurement.date, Measurement.prcp).all()
@@ -59,6 +62,7 @@ def precipitation():
 
 @app.route('/api/v1.0/stations')
 def stations():
+    """Return a JSON list of stations from the dataset."""
     session = Session(engine)
     
     results = session.query(Station.station, Station.name).all()
@@ -74,6 +78,42 @@ def stations():
 
     return jsonify(all_stations)
 
+
+@app.route('/api/v1.0/tobs')
+def tobs():
+    """Query the dates and temperature observations of the most active station for the last year of data."""
+    session = Session(engine)
+
+    #Find most active station
+    most_active_station = session.query(Measurement.station).group_by(Measurement.station).order_by(func.count().desc()).first()
+    (most_active, ) = most_active_station
+
+    #Find date range
+    recent_date_most_active = session.query(Measurement.date).filter(Measurement.station == most_active).order_by(Measurement.date.desc()).first()
+    (most_recent_date, ) = recent_date_most_active
+
+    most_recent_date = dt.datetime.strptime(most_recent_date, "%Y-%m-%d")
+    most_recent_date = most_recent_date.date()
+    twelve_months =  most_recent_date - dt.timedelta(days=365)
+
+    tobs = session.query(Measurement.date, Measurement.tobs).filter(Measurement.station == most_active).filter(Measurement.date >= twelve_months).all()
+
+    session.close()
+
+    all_tobserv = []
+    for date, tobs in all_tobserv:
+        all_tobserv_dict = {}
+        all_tobserv_dict['date'] = date
+        all_tobserv_dict['tobs'] = tobs
+        all_tobserv.append(all_tobserv_dict)
+
+    return jsonify(all_tobserv)
+
+
+@app.route('/api/v1.0/start')
+def start():
+
+    session = Session(engine)
 
 
 
