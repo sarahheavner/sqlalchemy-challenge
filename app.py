@@ -33,10 +33,17 @@ def home():
     """list all available API routes"""
     return(
         f"Available Routes:<br/>"
+        f"Data on precipitation:<br/>"
         f"/api/v1.0/precipitation<br/>"
+        f"Data on stations:<br/>"
         f"/api/v1.0/stations<br/>"
+        f"Data on observed temperatures:"
         f"/api/v1.0/tobs<br/>"
+        f"Mix, max, average temperatures for dates after start date:<br/>"
+        f"Note: format must be entered as follows - /api/v1.0/2016-12-14<br/>"
         f"/api/v1.0/&lt;start&gt;<br/>"
+        f"Mix, max, average temperatures for dates between start and end dates:<br/>"
+        f"Note: format must be entered as follows - /api/v1.0/2016-12-14/2017-01-22<br/>"
         f"/api/v1.0/start/&lt;start&gt;/&lt;end&gt;<br/>"
     )
 
