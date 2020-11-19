@@ -129,22 +129,82 @@ def tobs():
         all_tobserv.append(all_tobserv_dict)
 
     #Return results in JSON format
-    return jsonify(all_tobserv)
-
-
-#Create route for TMIN, TAVG, and TMAX per date starting from a starting date
-@app.route('/api/v1.0/start')
-def start():
-
+    return jsonify(all_tobserv)#Create session between Python and database
     session = Session(engine)
 
-    start_tobs = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
-        filter(Measurement.date >= start_date).all()
 
+    #Create route for TMIN, TAVG, and TMAX per date starting from a starting date
+@app.route('/api/v1.0/<start>')
+def start(start):
+    """TMIN, TAVG, and TMAX for a list of dates.
+    
+    Args:
+        start_date (string): A date string in the format %Y-%m-%d
+        
+    Returns:
+        TMIN, TAVE, and TMAX
+    """
+    #Create session between Python and database
+    session = Session(engine)
+
+
+    #Query for date, min, max, avg temperatures for given start date
+    start_date_tobs = session.query(func.min(Measurement.tobs), \
+                func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
+                filter(Measurement.date >= start).all()
+
+    #Close Session
     session.close()
 
-    return jsonify(start_tobs)
+    #Create list / dictionary for results
+    min_avg_max_one = []
+    for min, avg, max in start_date_tobs:
+        min_avg_max_dict={}
+        min_avg_max_dict['min'] = min
+        min_avg_max_dict['avg'] = avg
+        min_avg_max_dict['max'] = max
+        min_avg_max_one.append(min_avg_max_dict)
 
+    #Return results in JSON format
+    return jsonify(min_avg_max_one)
+
+
+
+#Create route for TMIN, TAVG, and TMAX per date between a date range
+@app.route('/api/v1.0/<start>/<end>')
+def start_end(start, end):
+    """TMIN, TAVG, and TMAX for a list of dates.
+    
+    Args:
+        start_date (string): A date string in the format %Y-%m-%d
+        end_date (string): A date string in the format %Y-%m-%d
+        
+    Returns:
+        TMIN, TAVE, and TMAX
+    """
+    #Create session between Python and database
+    session = Session(engine)
+
+    #Query for date, min, max, avg temperatures for given start date
+    start_end_date_tobs = session.query(func.min(Measurement.tobs)\
+                ,func.avg(Measurement.tobs), func.max(Measurement.tobs))\
+                .filter(Measurement.date >= start)\
+                .filter(Measurement.date <= end).all()
+
+    #Close Session
+    session.close()
+
+    #Create list / dictionary for results
+    min_avg_max = []
+    for min, avg, max in start_end_date_tobs:
+        min_avg_max_dict={}
+        min_avg_max_dict['min'] = min
+        min_avg_max_dict['avg'] = avg
+        min_avg_max_dict['max'] = max
+        min_avg_max.append(min_avg_max_dict)
+
+    #Return results in JSON format
+    return jsonify(min_avg_max)
 
 
 
